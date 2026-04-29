@@ -27,12 +27,8 @@
     <div id="status"></div>
 
     <script>
-        // Azure Configuration
-        const config = {
-            storageAccount: 'fileuploader12',
-            containerName: 'rashmika',
-            sasToken: 'sp=r&st=2026-04-29T06:18:39Z&se=2026-04-29T14:33:39Z&spr=https&sv=2025-11-05&sr=c&sig=4QPVYcO6wxm1YrvUk4QVr8Fz0sNt3C71UuG%2BOF10%2BiQ%3D'
-        };
+        // Server Configuration
+        const SERVER_URL = 'http://localhost:3000/upload';
 
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -48,37 +44,26 @@
                 return;
             }
 
-            // Validate config
-            if (!config.storageAccount || config.storageAccount === 'YOUR_STORAGE_ACCOUNT_NAME') {
-                statusDiv.className = 'error';
-                statusDiv.textContent = 'Please configure Azure credentials in the script';
-                return;
-            }
-
             uploadBtn.disabled = true;
             statusDiv.className = 'loading';
             statusDiv.textContent = 'Uploading...';
 
             try {
-                const blobUrl = `https://${config.storageAccount}.blob.core.windows.net/${config.containerName}/${file.name}?${config.sasToken}`;
-                
-                const response = await fetch(blobUrl, {
-                    method: 'PUT',
-                    headers: {
-                        'x-ms-blob-type': 'BlockBlob',
-                        'x-ms-date': new Date().toUTCString(),
-                        'x-ms-version': '2021-08-06',
-                        'Content-Type': file.type || 'application/octet-stream',
-                        'Content-Length': file.size
-                    },
-                    body: file
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const response = await fetch(SERVER_URL, {
+                    method: 'POST',
+                    body: formData
                 });
 
-                if (response.ok || response.status === 201) {
+                const result = await response.json();
+
+                if (result.success) {
                     statusDiv.className = 'success';
-                    statusDiv.textContent = `File "${file.name}" uploaded successfully!`;
+                    statusDiv.innerHTML = `File uploaded successfully!<br><a href="${result.url}" target="_blank">View File</a>`;
                 } else {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(result.error || 'Upload failed');
                 }
             } catch (error) {
                 statusDiv.className = 'error';
