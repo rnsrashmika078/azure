@@ -1,9 +1,9 @@
 <?php
 // Azure Blob Storage Configuration
 // Replace these values with your Azure storage credentials
-$storageAccount = 'YOUR_STORAGE_ACCOUNT_NAME';
-$containerName = 'YOUR_CONTAINER_NAME';
-$ sasToken = 'YOUR_SAS_TOKEN'; // Or use $accountKey for shared key auth
+$storageAccount = 'fileuploader12';
+$containerName = 'rashmika';
+$ sasToken = 'sp=r&st=2026-04-29T06:18:39Z&se=2026-04-29T14:33:39Z&spr=https&sv=2025-11-05&sr=c&sig=4QPVYcO6wxm1YrvUk4QVr8Fz0sNt3C71UuG%2BOF10%2BiQ%3D'; // Or use $accountKey for shared key auth
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['fileToUpload'])) {
     $file = $_FILES['fileToUpload'];
