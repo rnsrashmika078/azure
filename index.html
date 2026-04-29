@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload to Azure Blob Storage</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .upload-form { border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 8px; }
+        input[type="file"] { margin: 20px 0; }
+        button { background: #0078d4; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #106ebe; }
+        #status { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #dff6dd; color: #2e7d32; }
+        .error { background: #fdd; color: #c62828; }
+    </style>
+</head>
+<body>
+    <h1>Upload File to Azure</h1>
+    <form class="upload-form" action="test.php" method="post" enctype="multipart/form-data">
+        <input type="file" name="fileToUpload" id="fileToUpload" required>
+        <br>
+        <button type="submit" name="submit">Upload</button>
+    </form>
+    <div id="status"></div>
+
+    <script>
+        // Display status message if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        const message = urlParams.get('message');
+        
+        if (status) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = status;
+            statusDiv.textContent = decodeURIComponent(message || '');
+        }
+    </script>
+</body>
+</html>
