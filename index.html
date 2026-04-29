@@ -27,11 +27,11 @@
     <div id="status"></div>
 
     <script>
-        // Azure Configuration - Replace with your values
+        // Azure Configuration
         const config = {
             storageAccount: 'fileuploader12',
             containerName: 'rashmika',
-            sasToken: 'sp=r&st=2026-04-29T06:18:39Z&se=2026-04-29T14:33:39Z&spr=https&sv=2025-11-05&sr=c&sig=4QPVYcO6wxm1YrvUk4QVr8Fz0sNt3C71UuG%2BOF10%2BiQ%3D' // Must have write permission
+            sasToken: 'sp=r&st=2026-04-29T06:18:39Z&se=2026-04-29T14:33:39Z&spr=https&sv=2025-11-05&sr=c&sig=4QPVYcO6wxm1YrvUk4QVr8Fz0sNt3C71UuG%2BOF10%2BiQ%3D'
         };
 
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
@@ -49,7 +49,7 @@
             }
 
             // Validate config
-            if (config.storageAccount === 'fileuploader12' || !config.sasToken.startsWith('?')) {
+            if (!config.storageAccount || config.storageAccount === 'YOUR_STORAGE_ACCOUNT_NAME') {
                 statusDiv.className = 'error';
                 statusDiv.textContent = 'Please configure Azure credentials in the script';
                 return;
