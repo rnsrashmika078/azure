@@ -10,31 +10,83 @@
         input[type="file"] { margin: 20px 0; }
         button { background: #0078d4; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background: #106ebe; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         #status { margin-top: 20px; padding: 10px; border-radius: 4px; }
         .success { background: #dff6dd; color: #2e7d32; }
         .error { background: #fdd; color: #c62828; }
+        .loading { background: #e3f2fd; color: #1565c0; }
     </style>
 </head>
 <body>
     <h1>Upload File to Azure</h1>
-    <form class="upload-form" action="backend.php" method="post" enctype="multipart/form-data">
+    <form class="upload-form" id="uploadForm">
         <input type="file" name="fileToUpload" id="fileToUpload" required>
         <br>
-        <button type="submit" name="submit">Upload</button>
+        <button type="submit" id="uploadBtn">Upload</button>
     </form>
     <div id="status"></div>
 
     <script>
-        // Display status message if present
-        const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get('status');
-        const message = urlParams.get('message');
-        
-        if (status) {
+        // Azure Configuration - Replace with your values
+        const config = {
+            storageAccount: 'fileuploader12',
+            containerName: 'rashmika',
+            sasToken: 'sp=r&st=2026-04-29T06:18:39Z&se=2026-04-29T14:33:39Z&spr=https&sv=2025-11-05&sr=c&sig=4QPVYcO6wxm1YrvUk4QVr8Fz0sNt3C71UuG%2BOF10%2BiQ%3D' // Must have write permission
+        };
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('fileToUpload');
+            const file = fileInput.files[0];
             const statusDiv = document.getElementById('status');
-            statusDiv.className = status;
-            statusDiv.textContent = decodeURIComponent(message || '');
-        }
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (!file) {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Please select a file';
+                return;
+            }
+
+            // Validate config
+            if (config.storageAccount === 'YOUR_STORAGE_ACCOUNT_NAME' || !config.sasToken.startsWith('?')) {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Please configure Azure credentials in the script';
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            statusDiv.className = 'loading';
+            statusDiv.textContent = 'Uploading...';
+
+            try {
+                const blobUrl = `https://${config.storageAccount}.blob.core.windows.net/${config.containerName}/${file.name}?${config.sasToken}`;
+                
+                const response = await fetch(blobUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'x-ms-blob-type': 'BlockBlob',
+                        'x-ms-date': new Date().toUTCString(),
+                        'x-ms-version': '2021-08-06',
+                        'Content-Type': file.type || 'application/octet-stream',
+                        'Content-Length': file.size
+                    },
+                    body: file
+                });
+
+                if (response.ok || response.status === 201) {
+                    statusDiv.className = 'success';
+                    statusDiv.textContent = `File "${file.name}" uploaded successfully!`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                statusDiv.className = 'error';
+                statusDiv.textContent = 'Upload failed: ' + error.message;
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
